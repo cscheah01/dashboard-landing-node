@@ -60,7 +60,7 @@ type OverviewData = {
   activities: Activity[];
 };
 
-type BackendStatus = "loading" | "connected" | "error" | "demo";
+type BackendStatus = "loading" | "connected" | "error" | "hidden";
 
 function getApiBaseUrl() {
   return (
@@ -125,20 +125,22 @@ function createSmoothTrendPath(points: { value: number }[]) {
 }
 
 export default function DashboardPage() {
+  const apiBaseUrl = getApiBaseUrl();
   const [backendStatus, setBackendStatus] =
-    useState<BackendStatus>("loading");
-  const [backendMessage, setBackendMessage] = useState("Checking backend...");
+    useState<BackendStatus>(apiBaseUrl ? "loading" : "hidden");
+  const [backendMessage, setBackendMessage] = useState(
+    apiBaseUrl ? "Checking backend..." : "Backend not configured",
+  );
   const [overviewData, setOverviewData] =
     useState<OverviewData>(overviewFallback);
 
   useEffect(() => {
     let isMounted = true;
-    const apiBaseUrl = getApiBaseUrl();
 
     async function fetchBackendData() {
       if (!apiBaseUrl) {
-        setBackendStatus("demo");
-        setBackendMessage("Demo Mode");
+        setBackendStatus("hidden");
+        setBackendMessage("Backend not configured");
         return;
       }
 
@@ -173,7 +175,7 @@ export default function DashboardPage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [apiBaseUrl]);
 
   return (
     <>
@@ -262,16 +264,17 @@ export default function DashboardPage() {
 function BackendPill({ status }: { status: BackendStatus }) {
   const isConnected = status === "connected";
   const isLoading = status === "loading";
-  const isDemo = status === "demo";
+
+  if (status === "hidden") {
+    return null;
+  }
 
   return (
     <div
       className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium ${
         isConnected
           ? "border-emerald-300/25 bg-emerald-300/10 text-emerald-200"
-          : isDemo
-            ? "border-violet-300/25 bg-violet-300/10 text-violet-200"
-            : isLoading
+          : isLoading
             ? "border-sky-300/25 bg-sky-300/10 text-sky-200"
             : "border-rose-300/25 bg-rose-300/10 text-rose-200"
       }`}
@@ -280,17 +283,13 @@ function BackendPill({ status }: { status: BackendStatus }) {
         className={`h-1.5 w-1.5 rounded-full ${
           isConnected
             ? "bg-emerald-300"
-            : isDemo
-              ? "bg-violet-300"
-              : isLoading
+            : isLoading
               ? "bg-sky-300"
               : "bg-rose-300"
         }`}
       />
       {isConnected
         ? "Backend connected"
-        : isDemo
-          ? "Demo Mode"
         : isLoading
           ? "Checking backend"
           : "Backend offline"}
@@ -387,7 +386,7 @@ function BackendPanel({
   status: BackendStatus;
 }) {
   const isConnected = status === "connected";
-  const isDemo = status === "demo";
+  const isHidden = status === "hidden";
 
   return (
     <section className="rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/20">
@@ -414,13 +413,13 @@ function BackendPanel({
         <div className="rounded-md bg-white/[0.04] p-4">
           <p className="text-sm text-zinc-500">Endpoint</p>
           <p className="mt-2 break-all text-sm font-medium text-zinc-300">
-            {isDemo ? "Not configured" : getApiBaseUrl() || "Unavailable"}
+            {isHidden ? "Not configured" : getApiBaseUrl() || "Unavailable"}
           </p>
         </div>
         <div className="rounded-md bg-white/[0.04] p-4">
           <p className="text-sm text-zinc-500">Mode</p>
           <p className="mt-2 text-sm font-medium text-zinc-300">
-            {isDemo ? "Demo data" : "CORS enabled"}
+            {isHidden ? "Fallback data" : "CORS enabled"}
           </p>
         </div>
       </div>

@@ -66,7 +66,7 @@ const revenueTrend = [
   { week: "W12", value: 96 },
 ];
 
-type BackendStatus = "loading" | "connected" | "error" | "demo";
+type BackendStatus = "loading" | "connected" | "error" | "hidden";
 
 function getApiBaseUrl() {
   return (
@@ -77,18 +77,17 @@ function getApiBaseUrl() {
 
 export default function Home() {
   const currentYear = new Date().getFullYear();
+  const apiBaseUrl = getApiBaseUrl();
   const [backendStatus, setBackendStatus] =
-    useState<BackendStatus>("loading");
+    useState<BackendStatus>(apiBaseUrl ? "loading" : "hidden");
   const [backendMessage, setBackendMessage] = useState("Checking backend...");
 
   useEffect(() => {
     let isMounted = true;
-    const apiBaseUrl = getApiBaseUrl();
 
     async function fetchBackendStatus() {
       if (!apiBaseUrl) {
-        setBackendStatus("demo");
-        setBackendMessage("Demo Mode");
+        setBackendStatus("hidden");
         return;
       }
 
@@ -118,7 +117,7 @@ export default function Home() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [apiBaseUrl]);
 
   return (
     <main className="min-h-screen bg-[#05070d] text-white">
@@ -338,7 +337,10 @@ function BackendStatusBadge({
 }) {
   const isConnected = status === "connected";
   const isLoading = status === "loading";
-  const isDemo = status === "demo";
+
+  if (status === "hidden") {
+    return null;
+  }
 
   return (
     <div className="mb-5 flex">
@@ -346,9 +348,7 @@ function BackendStatusBadge({
         className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
           isConnected
             ? "border-emerald-300/25 bg-emerald-300/10 text-emerald-200"
-            : isDemo
-              ? "border-violet-300/25 bg-violet-300/10 text-violet-200"
-              : isLoading
+            : isLoading
               ? "border-sky-300/25 bg-sky-300/10 text-sky-200"
               : "border-rose-300/25 bg-rose-300/10 text-rose-200"
         }`}
@@ -357,16 +357,12 @@ function BackendStatusBadge({
           className={`h-1.5 w-1.5 rounded-full ${
             isConnected
               ? "bg-emerald-300"
-              : isDemo
-                ? "bg-violet-300"
-                : isLoading
+              : isLoading
                 ? "bg-sky-300"
                 : "bg-rose-300"
           }`}
         />
-        <span>
-          {isConnected ? "Backend connected" : isDemo ? "Demo Mode" : message}
-        </span>
+        <span>{isConnected ? "Backend connected" : message}</span>
         {isConnected ? <span className="text-zinc-400">{message}</span> : null}
       </div>
     </div>
