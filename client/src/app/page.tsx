@@ -66,7 +66,14 @@ const revenueTrend = [
   { week: "W12", value: 96 },
 ];
 
-type BackendStatus = "loading" | "connected" | "error";
+type BackendStatus = "loading" | "connected" | "error" | "demo";
+
+function getApiBaseUrl() {
+  return (
+    process.env.NEXT_PUBLIC_API_URL ??
+    (process.env.NODE_ENV === "development" ? "http://localhost:5000" : "")
+  );
+}
 
 export default function Home() {
   const currentYear = new Date().getFullYear();
@@ -76,10 +83,17 @@ export default function Home() {
 
   useEffect(() => {
     let isMounted = true;
+    const apiBaseUrl = getApiBaseUrl();
 
     async function fetchBackendStatus() {
+      if (!apiBaseUrl) {
+        setBackendStatus("demo");
+        setBackendMessage("Demo Mode");
+        return;
+      }
+
       try {
-        const response = await fetch("http://localhost:5000");
+        const response = await fetch(apiBaseUrl);
 
         if (!response.ok) {
           throw new Error("Backend returned an error");
@@ -324,6 +338,7 @@ function BackendStatusBadge({
 }) {
   const isConnected = status === "connected";
   const isLoading = status === "loading";
+  const isDemo = status === "demo";
 
   return (
     <div className="mb-5 flex">
@@ -331,7 +346,9 @@ function BackendStatusBadge({
         className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
           isConnected
             ? "border-emerald-300/25 bg-emerald-300/10 text-emerald-200"
-            : isLoading
+            : isDemo
+              ? "border-violet-300/25 bg-violet-300/10 text-violet-200"
+              : isLoading
               ? "border-sky-300/25 bg-sky-300/10 text-sky-200"
               : "border-rose-300/25 bg-rose-300/10 text-rose-200"
         }`}
@@ -340,12 +357,16 @@ function BackendStatusBadge({
           className={`h-1.5 w-1.5 rounded-full ${
             isConnected
               ? "bg-emerald-300"
-              : isLoading
+              : isDemo
+                ? "bg-violet-300"
+                : isLoading
                 ? "bg-sky-300"
                 : "bg-rose-300"
           }`}
         />
-        <span>{isConnected ? "Backend connected" : message}</span>
+        <span>
+          {isConnected ? "Backend connected" : isDemo ? "Demo Mode" : message}
+        </span>
         {isConnected ? <span className="text-zinc-400">{message}</span> : null}
       </div>
     </div>
