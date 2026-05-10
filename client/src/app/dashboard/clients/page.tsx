@@ -1,6 +1,14 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import ActionButton from "../components/ActionButton";
+import DashboardCard from "../components/DashboardCard";
+import EmptyTableRow from "../components/EmptyTableRow";
+import FormError from "../components/FormError";
+import SelectField from "../components/SelectField";
+import StatusBadge from "../components/StatusBadge";
+import StatusMessageBadge from "../components/StatusMessageBadge";
+import TextInput from "../components/TextInput";
 
 type Client = {
   id: number;
@@ -235,7 +243,7 @@ export default function ClientsPage() {
   return (
     <>
       <section className="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
-        <article className="rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/20">
+        <DashboardCard>
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold tracking-tight">
@@ -245,34 +253,22 @@ export default function ClientsPage() {
                 Keep client records simple while the data stays in memory.
               </p>
             </div>
-            <span
-              className={`rounded-full px-3 py-1 text-sm font-medium ${
-                error
-                  ? "bg-rose-300/10 text-rose-200"
-                  : "bg-teal-300/10 text-teal-200"
-              }`}
-            >
-              {message}
-            </span>
+            <StatusMessageBadge hasError={Boolean(error)} message={message} />
           </div>
 
           <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-            {error ? (
-              <p className="rounded-md border border-rose-300/20 bg-rose-300/10 px-4 py-3 text-sm text-rose-200">
-                {error}
-              </p>
-            ) : null}
-            <ClientInput
+            <FormError message={error} />
+            <TextInput
               label="Name"
               onChange={(value) => setForm({ ...form, name: value })}
               value={form.name}
             />
-            <ClientInput
+            <TextInput
               label="Company"
               onChange={(value) => setForm({ ...form, company: value })}
               value={form.company}
             />
-            <ClientInput
+            <TextInput
               label="Email"
               onChange={(value) => setForm({ ...form, email: value })}
               type="email"
@@ -280,63 +276,42 @@ export default function ClientsPage() {
             />
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block">
-                <span className="text-sm text-zinc-400">Plan</span>
-                <select
-                  className="mt-2 w-full rounded-md border border-white/10 bg-zinc-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-teal-300/50"
-                  onChange={(event) =>
-                    setForm({ ...form, plan: event.target.value })
-                  }
-                  value={form.plan}
-                >
-                  <option>Starter</option>
-                  <option>Growth</option>
-                  <option>Scale</option>
-                </select>
-              </label>
-              <label className="block">
-                <span className="text-sm text-zinc-400">Status</span>
-                <select
-                  className="mt-2 w-full rounded-md border border-white/10 bg-zinc-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-teal-300/50"
-                  onChange={(event) =>
-                    setForm({ ...form, status: event.target.value })
-                  }
-                  value={form.status}
-                >
-                  <option>Active</option>
-                  <option>Trial</option>
-                  <option>Paused</option>
-                  <option>Churned</option>
-                </select>
-              </label>
+              <SelectField
+                label="Plan"
+                onChange={(value) => setForm({ ...form, plan: value })}
+                options={["Starter", "Growth", "Scale"]}
+                value={form.plan}
+              />
+              <SelectField
+                label="Status"
+                onChange={(value) => setForm({ ...form, status: value })}
+                options={["Active", "Trial", "Paused", "Churned"]}
+                value={form.status}
+              />
             </div>
 
             <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-              <button
-                className="rounded-full bg-teal-300 px-5 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={isSaving}
-                type="submit"
-              >
+              <ActionButton disabled={isSaving} type="submit">
                 {isSaving
                   ? "Saving..."
                   : editingClientId === null
                     ? "Add client"
                     : "Save changes"}
-              </button>
+              </ActionButton>
               {editingClientId !== null ? (
-                <button
-                  className="rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/35 hover:bg-white/10"
+                <ActionButton
                   onClick={cancelEditing}
                   type="button"
+                  variant="secondary"
                 >
                   Cancel
-                </button>
+                </ActionButton>
               ) : null}
             </div>
           </form>
-        </article>
+        </DashboardCard>
 
-        <article className="rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/20">
+        <DashboardCard>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold tracking-tight">Clients</h2>
@@ -350,29 +325,20 @@ export default function ClientsPage() {
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_180px]">
-            <label className="block">
-              <span className="text-sm text-zinc-400">Search clients</span>
-              <input
-                className="mt-2 w-full rounded-md border border-white/10 bg-zinc-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-teal-300/50"
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search name, email, or company"
-                type="search"
-                value={searchQuery}
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm text-zinc-400">Status</span>
-              <select
-                className="mt-2 w-full rounded-md border border-white/10 bg-zinc-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-teal-300/50"
-                onChange={(event) => setStatusFilter(event.target.value)}
-                value={statusFilter}
-              >
-                <option>All</option>
-                <option>Active</option>
-                <option>Pending</option>
-                <option>Inactive</option>
-              </select>
-            </label>
+            <TextInput
+              label="Search clients"
+              onChange={setSearchQuery}
+              placeholder="Search name, email, or company"
+              required={false}
+              type="search"
+              value={searchQuery}
+            />
+            <SelectField
+              label="Status"
+              onChange={setStatusFilter}
+              options={["All", "Active", "Pending", "Inactive"]}
+              value={statusFilter}
+            />
           </div>
 
           <div className="mt-5 overflow-x-auto">
@@ -388,33 +354,16 @@ export default function ClientsPage() {
               </thead>
               <tbody className="divide-y divide-white/10">
                 {isLoading ? (
-                  <tr>
-                    <td
-                      className="py-10 text-center text-sm text-zinc-500"
-                      colSpan={5}
-                    >
-                      Loading clients...
-                    </td>
-                  </tr>
+                  <EmptyTableRow colSpan={5}>Loading clients...</EmptyTableRow>
                 ) : clients.length === 0 ? (
-                  <tr>
-                    <td
-                      className="py-10 text-center text-sm text-zinc-500"
-                      colSpan={5}
-                    >
+                  <EmptyTableRow colSpan={5}>
                       No clients yet. Add your first client to populate this
                       table.
-                    </td>
-                  </tr>
+                  </EmptyTableRow>
                 ) : filteredClients.length === 0 ? (
-                  <tr>
-                    <td
-                      className="py-10 text-center text-sm text-zinc-500"
-                      colSpan={5}
-                    >
+                  <EmptyTableRow colSpan={5}>
                       No clients match your current search or status filter.
-                    </td>
-                  </tr>
+                  </EmptyTableRow>
                 ) : (
                   filteredClients.map((client) => (
                   <tr key={client.id}>
@@ -429,33 +378,35 @@ export default function ClientsPage() {
                     </td>
                     <td className="px-4 py-4 text-zinc-400">{client.plan}</td>
                     <td className="px-4 py-4">
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      <StatusBadge
+                        className={
                           statusStyles[client.status] ??
                           "bg-white/[0.06] text-zinc-300"
-                        }`}
+                        }
                       >
                         {client.status}
-                      </span>
+                      </StatusBadge>
                     </td>
                     <td className="py-4 pl-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <button
-                          className="rounded-full border border-white/15 px-3 py-1.5 text-xs font-semibold text-zinc-200 transition hover:border-teal-300/50 hover:bg-teal-300/10 hover:text-teal-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        <ActionButton
+                          className="px-3 py-1.5 text-xs"
                           disabled={isSaving}
                           onClick={() => startEditing(client)}
                           type="button"
+                          variant="ghost"
                         >
                           Edit
-                        </button>
-                        <button
-                          className="rounded-full border border-rose-300/20 px-3 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-300/10 disabled:cursor-not-allowed disabled:opacity-60"
+                        </ActionButton>
+                        <ActionButton
+                          className="px-3 py-1.5 text-xs"
                           disabled={isSaving}
                           onClick={() => handleDelete(client.id)}
                           type="button"
+                          variant="danger"
                         >
                           Delete
-                        </button>
+                        </ActionButton>
                       </div>
                     </td>
                   </tr>
@@ -464,33 +415,8 @@ export default function ClientsPage() {
               </tbody>
             </table>
           </div>
-        </article>
+        </DashboardCard>
       </section>
     </>
-  );
-}
-
-function ClientInput({
-  label,
-  onChange,
-  type = "text",
-  value,
-}: {
-  label: string;
-  onChange: (value: string) => void;
-  type?: string;
-  value: string;
-}) {
-  return (
-    <label className="block">
-      <span className="text-sm text-zinc-400">{label}</span>
-      <input
-        className="mt-2 w-full rounded-md border border-white/10 bg-zinc-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-700 focus:border-teal-300/50"
-        onChange={(event) => onChange(event.target.value)}
-        required
-        type={type}
-        value={value}
-      />
-    </label>
   );
 }
