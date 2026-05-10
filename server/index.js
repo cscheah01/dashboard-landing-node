@@ -140,6 +140,44 @@ let clients = [
   },
 ];
 
+let nextLeadId = 4;
+
+let leads = [
+  {
+    id: 1,
+    name: "Rachel Wong",
+    company: "Nimbus Analytics",
+    email: "rachel@nimbusanalytics.com",
+    source: "Website",
+    stage: "New",
+    value: 18000,
+    owner: "Sales",
+    createdAt: "2026-05-01",
+  },
+  {
+    id: 2,
+    name: "Ethan Miller",
+    company: "Orbit Finance",
+    email: "ethan@orbitfinance.com",
+    source: "Referral",
+    stage: "Qualified",
+    value: 42000,
+    owner: "Growth",
+    createdAt: "2026-05-03",
+  },
+  {
+    id: 3,
+    name: "Nadia Rahman",
+    company: "PeakOps",
+    email: "nadia@peakops.com",
+    source: "Webinar",
+    stage: "Proposal",
+    value: 65000,
+    owner: "Enterprise",
+    createdAt: "2026-05-06",
+  },
+];
+
 function validateClientInput(body) {
   const client = {
     name: body.name?.trim(),
@@ -156,6 +194,38 @@ function validateClientInput(body) {
   }
 
   return { client };
+}
+
+function validateLeadInput(body) {
+  const value = Number(body.value);
+  const lead = {
+    name: body.name?.trim(),
+    company: body.company?.trim(),
+    email: body.email?.trim(),
+    source: body.source?.trim(),
+    stage: body.stage?.trim(),
+    value,
+    owner: body.owner?.trim(),
+    createdAt: body.createdAt?.trim(),
+  };
+
+  if (
+    !lead.name ||
+    !lead.company ||
+    !lead.email ||
+    !lead.source ||
+    !lead.stage ||
+    !lead.owner ||
+    !lead.createdAt ||
+    Number.isNaN(value)
+  ) {
+    return {
+      error:
+        "Name, company, email, source, stage, value, owner, and created date are required.",
+    };
+  }
+
+  return { lead };
 }
 
 app.get("/", (req, res) => {
@@ -231,6 +301,65 @@ app.delete("/api/clients/:id", (req, res) => {
   }
 
   clients = clients.filter((client) => client.id !== clientId);
+
+  res.status(204).send();
+});
+
+app.get("/api/leads", (req, res) => {
+  res.json(leads);
+});
+
+app.post("/api/leads", (req, res) => {
+  const { lead, error } = validateLeadInput(req.body);
+
+  if (error) {
+    return res.status(400).json({ message: error });
+  }
+
+  const newLead = {
+    ...lead,
+    id: nextLeadId,
+  };
+
+  nextLeadId += 1;
+  leads.push(newLead);
+
+  res.status(201).json(newLead);
+});
+
+app.put("/api/leads/:id", (req, res) => {
+  const leadId = Number(req.params.id);
+  const leadIndex = leads.findIndex((lead) => lead.id === leadId);
+
+  if (leadIndex === -1) {
+    return res.status(404).json({ message: "Lead not found." });
+  }
+
+  const { lead, error } = validateLeadInput(req.body);
+
+  if (error) {
+    return res.status(400).json({ message: error });
+  }
+
+  const updatedLead = {
+    ...lead,
+    id: leadId,
+  };
+
+  leads[leadIndex] = updatedLead;
+
+  res.json(updatedLead);
+});
+
+app.delete("/api/leads/:id", (req, res) => {
+  const leadId = Number(req.params.id);
+  const leadExists = leads.some((lead) => lead.id === leadId);
+
+  if (!leadExists) {
+    return res.status(404).json({ message: "Lead not found." });
+  }
+
+  leads = leads.filter((lead) => lead.id !== leadId);
 
   res.status(204).send();
 });
