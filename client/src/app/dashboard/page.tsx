@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import DashboardCard from "./components/DashboardCard";
 import StatusBadge from "./components/StatusBadge";
+import { apiFetch, getApiBaseUrl } from "@/lib/api";
 
 const overviewFallback = {
   metrics: [
@@ -83,13 +84,6 @@ type OverviewData = {
 
 type BackendStatus = "loading" | "connected" | "error" | "hidden";
 
-function getApiBaseUrl() {
-  return (
-    process.env.NEXT_PUBLIC_API_URL ??
-    (process.env.NODE_ENV === "development" ? "http://localhost:5000" : "")
-  );
-}
-
 function getChangeBadgeClass(change: string) {
   return change.trim().startsWith("-")
     ? "bg-rose-300/10 text-rose-300"
@@ -167,8 +161,8 @@ export default function DashboardPage() {
 
       try {
         const [statusResponse, overviewResponse] = await Promise.all([
-          fetch(apiBaseUrl),
-          fetch(`${apiBaseUrl}/api/dashboard/overview`),
+          apiFetch("/"),
+          apiFetch("/api/dashboard/overview"),
         ]);
 
         if (!statusResponse.ok || !overviewResponse.ok) {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import DashboardCard from "../components/DashboardCard";
 import StatusBadge from "../components/StatusBadge";
+import { apiFetch } from "@/lib/api";
 
 const analyticsFallback = {
   metrics: [
@@ -96,9 +97,7 @@ export default function AnalyticsPage() {
 
     async function fetchAnalyticsData() {
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/dashboard/analytics",
-        );
+        const response = await apiFetch("/api/dashboard/analytics");
 
         if (!response.ok) {
           throw new Error("Analytics request failed");

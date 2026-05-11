@@ -9,6 +9,7 @@ import SelectField from "../components/SelectField";
 import StatusBadge from "../components/StatusBadge";
 import StatusMessageBadge from "../components/StatusMessageBadge";
 import TextInput from "../components/TextInput";
+import { apiFetch } from "@/lib/api";
 
 type LeadStage = "New" | "Contacted" | "Qualified" | "Proposal" | "Won" | "Lost";
 
@@ -83,7 +84,7 @@ export default function LeadsPage() {
 
   async function loadLeads(isMounted = true) {
     try {
-      const response = await fetch("http://localhost:5000/api/leads");
+      const response = await apiFetch("/api/leads");
 
       if (!response.ok) {
         throw new Error("Leads request failed");
@@ -113,7 +114,7 @@ export default function LeadsPage() {
 
     async function loadInitialLeads() {
       try {
-        const response = await fetch("http://localhost:5000/api/leads");
+        const response = await apiFetch("/api/leads");
 
         if (!response.ok) {
           throw new Error("Leads request failed");
@@ -184,14 +185,14 @@ export default function LeadsPage() {
 
     const endpoint =
       editingLeadId === null
-        ? "http://localhost:5000/api/leads"
-        : `http://localhost:5000/api/leads/${editingLeadId}`;
+        ? "/api/leads"
+        : `/api/leads/${editingLeadId}`;
 
     try {
       setIsSaving(true);
       setError("");
 
-      const response = await fetch(endpoint, {
+      const response = await apiFetch(endpoint, {
         method: editingLeadId === null ? "POST" : "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -220,7 +221,7 @@ export default function LeadsPage() {
       setIsSaving(true);
       setError("");
 
-      const response = await fetch(`http://localhost:5000/api/leads/${leadId}`, {
+      const response = await apiFetch(`/api/leads/${leadId}`, {
         method: "DELETE",
       });
 

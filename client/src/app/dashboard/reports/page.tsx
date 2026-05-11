@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import ActionButton from "../components/ActionButton";
 import DashboardCard from "../components/DashboardCard";
 import StatusBadge from "../components/StatusBadge";
+import { apiFetch } from "@/lib/api";
 
 const reportsFallback = {
   reports: [
@@ -110,9 +111,7 @@ export default function ReportsPage() {
 
     async function fetchReportsData() {
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/dashboard/reports",
-        );
+        const response = await apiFetch("/api/dashboard/reports");
 
         if (!response.ok) {
           throw new Error("Reports request failed");

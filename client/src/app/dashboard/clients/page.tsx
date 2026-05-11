@@ -9,6 +9,7 @@ import SelectField from "../components/SelectField";
 import StatusBadge from "../components/StatusBadge";
 import StatusMessageBadge from "../components/StatusMessageBadge";
 import TextInput from "../components/TextInput";
+import { apiFetch } from "@/lib/api";
 
 type Client = {
   id: number;
@@ -65,7 +66,7 @@ export default function ClientsPage() {
 
   async function loadClients(isMounted = true) {
     try {
-      const response = await fetch("http://localhost:5000/api/clients");
+      const response = await apiFetch("/api/clients");
 
       if (!response.ok) {
         throw new Error("Clients request failed");
@@ -95,7 +96,7 @@ export default function ClientsPage() {
 
     async function loadInitialClients() {
       try {
-        const response = await fetch("http://localhost:5000/api/clients");
+        const response = await apiFetch("/api/clients");
 
         if (!response.ok) {
           throw new Error("Clients request failed");
@@ -156,14 +157,14 @@ export default function ClientsPage() {
 
     const endpoint =
       editingClientId === null
-        ? "http://localhost:5000/api/clients"
-        : `http://localhost:5000/api/clients/${editingClientId}`;
+        ? "/api/clients"
+        : `/api/clients/${editingClientId}`;
 
     try {
       setIsSaving(true);
       setError("");
 
-      const response = await fetch(endpoint, {
+      const response = await apiFetch(endpoint, {
         method: editingClientId === null ? "POST" : "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -192,12 +193,9 @@ export default function ClientsPage() {
       setIsSaving(true);
       setError("");
 
-      const response = await fetch(
-        `http://localhost:5000/api/clients/${clientId}`,
-        {
-          method: "DELETE",
-        },
-      );
+      const response = await apiFetch(`/api/clients/${clientId}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) {
         throw new Error("Delete request failed");

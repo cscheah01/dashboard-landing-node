@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiFetch, getApiBaseUrl } from "@/lib/api";
 
 const features = [
   {
@@ -68,13 +69,6 @@ const revenueTrend = [
 
 type BackendStatus = "loading" | "connected" | "error" | "hidden";
 
-function getApiBaseUrl() {
-  return (
-    process.env.NEXT_PUBLIC_API_URL ??
-    (process.env.NODE_ENV === "development" ? "http://localhost:5000" : "")
-  );
-}
-
 export default function Home() {
   const currentYear = new Date().getFullYear();
   const apiBaseUrl = getApiBaseUrl();
@@ -92,7 +86,7 @@ export default function Home() {
       }
 
       try {
-        const response = await fetch(apiBaseUrl);
+        const response = await apiFetch("/");
 
         if (!response.ok) {
           throw new Error("Backend returned an error");
