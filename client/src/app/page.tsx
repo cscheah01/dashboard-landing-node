@@ -72,6 +72,7 @@ type BackendStatus = "loading" | "connected" | "error" | "hidden";
 export default function Home() {
   const currentYear = new Date().getFullYear();
   const apiBaseUrl = getApiBaseUrl();
+  const shouldShowBackendStatus = process.env.NODE_ENV === "development";
   const [backendStatus, setBackendStatus] =
     useState<BackendStatus>(apiBaseUrl ? "loading" : "hidden");
   const [backendMessage, setBackendMessage] = useState("Checking backend...");
@@ -146,10 +147,12 @@ export default function Home() {
               <p className="mb-5 inline-flex rounded-full border border-teal-300/25 bg-teal-300/10 px-3 py-1 text-sm font-medium text-teal-200">
                 Analytics for high-velocity SaaS teams
               </p>
-              <BackendStatusBadge
-                message={backendMessage}
-                status={backendStatus}
-              />
+              {shouldShowBackendStatus ? (
+                <BackendStatusBadge
+                  message={backendMessage}
+                  status={backendStatus}
+                />
+              ) : null}
               <h1 className="max-w-4xl text-5xl font-semibold leading-[1.03] tracking-tight text-white sm:text-6xl lg:text-7xl">
                 Run your business from one executive dashboard.
               </h1>
