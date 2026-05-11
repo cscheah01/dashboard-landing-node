@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import DashboardCard from "./components/DashboardCard";
+import StatusBadge from "./components/StatusBadge";
 
 const overviewFallback = {
   metrics: [
@@ -50,6 +52,25 @@ const overviewFallback = {
   },
   ],
 };
+
+const pipelineStages = [
+  { label: "New", value: 24, amount: "$148K", color: "bg-sky-300" },
+  { label: "Qualified", value: 18, amount: "$286K", color: "bg-emerald-300" },
+  { label: "Proposal", value: 9, amount: "$412K", color: "bg-violet-300" },
+  { label: "Won", value: 6, amount: "$196K", color: "bg-teal-300" },
+];
+
+const upcomingTasks = [
+  { task: "Review enterprise renewal deck", owner: "Finance", due: "Today" },
+  { task: "Follow up with proposal-stage leads", owner: "Sales", due: "Tomorrow" },
+  { task: "Publish weekly operating summary", owner: "Ops", due: "Fri" },
+];
+
+const topClients = [
+  { company: "Vertex Labs", plan: "Scale", revenue: "$84K", health: "96%" },
+  { company: "Aurora Systems", plan: "Growth", revenue: "$62K", health: "91%" },
+  { company: "Summit Cloud", plan: "Starter", revenue: "$28K", health: "87%" },
+];
 
 type Metric = (typeof overviewFallback.metrics)[number];
 type RevenuePoint = (typeof overviewFallback.revenueData)[number];
@@ -181,24 +202,20 @@ export default function DashboardPage() {
     <>
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {overviewData.metrics.map((metric) => (
-          <article
+          <DashboardCard
             key={metric.label}
-            className="rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/20"
+            className="transition hover:-translate-y-0.5 hover:border-teal-300/30 hover:bg-white/[0.06]"
           >
             <p className="text-sm text-zinc-400">{metric.label}</p>
             <div className="mt-4 flex items-end justify-between gap-4">
               <p className="text-3xl font-semibold tracking-tight">
                 {metric.value}
               </p>
-              <span
-                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getChangeBadgeClass(
-                  metric.change,
-                )}`}
-              >
+              <StatusBadge className={getChangeBadgeClass(metric.change)}>
                 {metric.change}
-              </span>
+              </StatusBadge>
             </div>
-          </article>
+          </DashboardCard>
         ))}
       </section>
 
@@ -207,56 +224,147 @@ export default function DashboardPage() {
         <BackendPanel message={backendMessage} status={backendStatus} />
       </section>
 
-      <section className="mt-6 rounded-lg border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/20">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <section className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <DashboardCard className="bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.08),transparent_35%),rgba(255,255,255,0.04)]">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight">
+                Lead pipeline
+              </h2>
+              <p className="mt-1 text-sm text-zinc-500">
+                Mock opportunity flow by stage.
+              </p>
+            </div>
+            <StatusBadge className="bg-teal-300/10 text-teal-200">
+              $1.04M open
+            </StatusBadge>
+          </div>
+          <div className="mt-6 space-y-4">
+            {pipelineStages.map((stage) => (
+              <div key={stage.label}>
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="text-zinc-300">{stage.label}</span>
+                  <span className="text-zinc-500">
+                    {stage.value} leads / {stage.amount}
+                  </span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className={`h-full rounded-full ${stage.color}`}
+                    style={{ width: `${Math.min(stage.value * 4, 100)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </DashboardCard>
+
+        <DashboardCard>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight">
+                Upcoming tasks
+              </h2>
+              <p className="mt-1 text-sm text-zinc-500">
+                Preview of priority operating work.
+              </p>
+            </div>
+            <StatusBadge className="bg-white/[0.06] text-zinc-300">
+              3 open
+            </StatusBadge>
+          </div>
+          <div className="mt-5 space-y-3">
+            {upcomingTasks.map((item) => (
+              <div
+                className="rounded-md border border-white/10 bg-zinc-950/60 p-4 transition hover:border-white/20 hover:bg-white/[0.05]"
+                key={item.task}
+              >
+                <p className="font-medium text-white">{item.task}</p>
+                <div className="mt-2 flex justify-between text-sm text-zinc-500">
+                  <span>{item.owner}</span>
+                  <span>{item.due}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DashboardCard>
+      </section>
+
+      <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_0.85fr]">
+        <DashboardCard>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight">
+                Recent activity
+              </h2>
+              <p className="mt-1 text-sm text-zinc-500">
+                Latest operational updates across the business.
+              </p>
+            </div>
+            <span className="rounded-full bg-white/[0.05] px-3 py-1 text-sm text-zinc-400">
+              Live feed
+            </span>
+          </div>
+
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead className="border-b border-white/10 text-xs uppercase tracking-[0.16em] text-zinc-500">
+                <tr>
+                  <th className="py-3 pr-4 font-medium">Event</th>
+                  <th className="px-4 py-3 font-medium">Owner</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="py-3 pl-4 text-right font-medium">Time</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/10">
+                {overviewData.activities.map((activity) => (
+                  <tr className="transition hover:bg-white/[0.03]" key={activity.event}>
+                    <td className="py-4 pr-4 font-medium text-white">
+                      {activity.event}
+                    </td>
+                    <td className="px-4 py-4 text-zinc-400">{activity.owner}</td>
+                    <td className="px-4 py-4">
+                      <StatusBadge className={getStatusBadgeClass(activity.status)}>
+                        {activity.status}
+                      </StatusBadge>
+                    </td>
+                    <td className="py-4 pl-4 text-right text-zinc-500">
+                      {activity.time}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </DashboardCard>
+
+        <DashboardCard>
           <div>
-            <h2 className="text-xl font-semibold tracking-tight">
-              Recent activity
-            </h2>
+            <h2 className="text-xl font-semibold tracking-tight">Top clients</h2>
             <p className="mt-1 text-sm text-zinc-500">
-              Latest operational updates across the business.
+              Mock customer health and revenue preview.
             </p>
           </div>
-          <span className="rounded-full bg-white/[0.05] px-3 py-1 text-sm text-zinc-400">
-            Live feed
-          </span>
-        </div>
-
-        <div className="mt-5 overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="border-b border-white/10 text-xs uppercase tracking-[0.16em] text-zinc-500">
-              <tr>
-                <th className="py-3 pr-4 font-medium">Event</th>
-                <th className="px-4 py-3 font-medium">Owner</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="py-3 pl-4 text-right font-medium">Time</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/10">
-              {overviewData.activities.map((activity) => (
-                <tr key={activity.event}>
-                  <td className="py-4 pr-4 font-medium text-white">
-                    {activity.event}
-                  </td>
-                  <td className="px-4 py-4 text-zinc-400">{activity.owner}</td>
-                  <td className="px-4 py-4">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusBadgeClass(
-                        activity.status,
-                      )}`}
-                    >
-                      {activity.status}
-                    </span>
-                  </td>
-                  <td className="py-4 pl-4 text-right text-zinc-500">
-                    {activity.time}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <div className="mt-5 space-y-3">
+            {topClients.map((client) => (
+              <div
+                className="grid grid-cols-[1fr_auto] gap-4 rounded-md bg-zinc-950/60 p-4 transition hover:bg-white/[0.05]"
+                key={client.company}
+              >
+                <div>
+                  <p className="font-medium text-white">{client.company}</p>
+                  <p className="mt-1 text-sm text-zinc-500">{client.plan}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-teal-200">{client.revenue}</p>
+                  <p className="mt-1 text-sm text-zinc-500">{client.health} health</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DashboardCard>
       </section>
+
     </>
   );
 }
